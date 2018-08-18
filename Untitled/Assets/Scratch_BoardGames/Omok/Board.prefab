@@ -110,4 +110,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 690eaec0f93f5ab43b5171ee52fb1fb2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  tilesRow: 0
+  tilesColumn: 0
   tileTexture: {fileID: 2800000, guid: bc0993f8b9443684e95f1438aa8385b1, type: 3}

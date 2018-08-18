@@ -8,6 +8,7 @@ public class GameManager_Omok : MonoBehaviour {
 
     private Omok_Board omokBoard;
     private Omok_BoardTile.TileOccupation currentTurn;
+    private int linkCount;
     private bool gameOver;
 
 	// Use this for initialization
@@ -42,21 +43,32 @@ public class GameManager_Omok : MonoBehaviour {
                 if (CheckCompletion(x, z) == true)
                 {
                     gameOver = true;
+
+                    if (linkCount > 5) TurnOver();
+
                     Debug.Log(currentTurn + " wins.");
+
                     return;
                 }
 
-                currentTurn++;
-                if (currentTurn > Omok_BoardTile.TileOccupation.White) currentTurn = Omok_BoardTile.TileOccupation.Black;
+                TurnOver();
+
+                Debug.Log(linkCount);
             }
         }
+    }
+
+    private void TurnOver()
+    {
+        currentTurn++;
+        if (currentTurn > Omok_BoardTile.TileOccupation.White) currentTurn = Omok_BoardTile.TileOccupation.Black;
     }
 
     private bool CheckCompletion(int x, int z)
     {
         if (CheckRowCompletion(x, z) == true) return true;
-        if (CheckColumnCompletion(x, z) == true) return true;
-        if (CheckDiagonalCompletion(x, z) == true) return true;
+        //if (CheckColumnCompletion(x, z) == true) return true;
+        //if (CheckDiagonalCompletion(x, z) == true) return true;
 
         return false;
     }
@@ -88,17 +100,26 @@ public class GameManager_Omok : MonoBehaviour {
     private bool CheckRowCompletion(int x, int z)
     {
         int leftMost = x - 4;
+        if (leftMost < 0) leftMost = 0;
+
+        linkCount = 0;
+
+        int checkStartingIndex = 0;
 
         for (int i = leftMost; i <= x; i++)
         {
-            if (CheckXAvailable(i) == false) continue;
-
-            if ((omokBoard.boardData[i, z].Occupier == currentTurn) && (omokBoard.boardData[i + 1, z].Occupier == currentTurn) &&
-                (omokBoard.boardData[i + 2, z].Occupier == currentTurn) && (omokBoard.boardData[i + 3, z].Occupier == currentTurn) &&
-                (omokBoard.boardData[i + 4, z].Occupier == currentTurn)) return true;
+            if (omokBoard.boardData[i, z].Occupier == currentTurn)
+            {
+                checkStartingIndex = i;
+                linkCount++;
+                break;
+            }
         }
 
-        return false;
+        for (int i = checkStartingIndex; i < omokBoard.tilesRow; i++)
+        {
+
+        }
     }
 
     private bool CheckZAvailable(int z)
