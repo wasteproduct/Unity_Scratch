@@ -10,6 +10,7 @@ public class GameManager_Omok : MonoBehaviour {
     private Omok_BoardTile.TileOccupation currentTurn;
     private int linkCount;
     private bool gameOver;
+    private readonly int invalidIndex = -1;
 
 	// Use this for initialization
 	void Start () {
@@ -52,8 +53,6 @@ public class GameManager_Omok : MonoBehaviour {
                 }
 
                 TurnOver();
-
-                Debug.Log(linkCount);
             }
         }
     }
@@ -66,80 +65,212 @@ public class GameManager_Omok : MonoBehaviour {
 
     private bool CheckCompletion(int x, int z)
     {
-        if (CheckRowCompletion(x, z) == true) return true;
-        //if (CheckColumnCompletion(x, z) == true) return true;
-        //if (CheckDiagonalCompletion(x, z) == true) return true;
+        if (CheckRowCompletion(z) == true) return true;
+        if (CheckColumnCompletion(x) == true) return true;
+        if (CheckDiagonalCompletion(x, z) == true) return true;
 
         return false;
     }
 
     private bool CheckDiagonalCompletion(int x, int z)
     {
-        int leftMost = x - 4;
-        int bottom = z - 4;
+        if (CheckDirectProportional(x, z) == true) return true;
+        if (CheckInverseProportional(x, z) == true) return true;
 
         return false;
     }
 
-    private bool CheckColumnCompletion(int x, int z)
+    private bool CheckDirectProportional(int x, int z)
     {
-        int bottom = z - 4;
-
-        for (int i = bottom; i <= z; i++)
-        {
-            if (CheckZAvailable(i) == false) continue;
-
-            if ((omokBoard.boardData[x, i].Occupier == currentTurn) && (omokBoard.boardData[x, i + 1].Occupier == currentTurn) &&
-                (omokBoard.boardData[x, i + 2].Occupier == currentTurn) && (omokBoard.boardData[x, i + 3].Occupier == currentTurn) &&
-                (omokBoard.boardData[x, i + 4].Occupier == currentTurn)) return true;
-        }
-
-        return false;
-    }
-
-    private bool CheckRowCompletion(int x, int z)
-    {
-        int leftMost = x - 4;
-        if (leftMost < 0) leftMost = 0;
-
         linkCount = 0;
 
-        int checkStartingIndex = 0;
+        int xIndex = x;
+        int zIndex = z;
+        int row = omokBoard.tilesRow;
+        int column = omokBoard.tilesColumn;
 
-        for (int i = leftMost; i <= x; i++)
+        //인덱스 초기화
+        while(true)
         {
-            if (omokBoard.boardData[i, z].Occupier == currentTurn)
+            if((xIndex<=0)||(zIndex<=0))
+        }
+
+        while (true)
+        {
+            int failureCount = 0;
+
+            //검사 시작할 인덱스 색출
+            while (true)
             {
-                checkStartingIndex = i;
-                linkCount++;
-                break;
+                //찾았으면 ++, 검사 시작
+                if (omokBoard.boardData[x, index].Occupier == currentTurn)
+                {
+                    linkCount++;
+                    failureCount = 0;
+                    break;
+                }
+
+                //못 찾았으면 다음 걸 보고
+                index++;
+
+                //끝까지 못 찾으면 검사 종료
+                if (index >= column) break;
+
+                failureCount++;
+                if (failureCount >= column) return false;
             }
+
+            while (true)
+            {
+                //다음 걸 보고
+                index++;
+
+                //다 봤으면 검사 종료
+                if (index >= column) break;
+
+                //돌 있으면 ++
+                if (omokBoard.boardData[x, index].Occupier == currentTurn) linkCount++;
+                //끊겨 있으면
+                else
+                {
+                    //끊긴 시점에서 연결된 돌 수 확인
+                    if (linkCount >= 5) return true;
+
+                    //안 끝났으면 카운트 0, 검사 재개
+                    linkCount = 0;
+                    break;
+                }
+            }
+
+            if (index >= column) break;
         }
 
-        for (int i = checkStartingIndex; i < omokBoard.tilesRow; i++)
+        if (linkCount >= 5) return true;
+
+        return false;
+    }
+
+    private bool CheckColumnCompletion(int x)
+    {
+        linkCount = 0;
+
+        int index = 0;
+        int column = omokBoard.tilesColumn;
+
+        while (true)
         {
+            int failureCount = 0;
 
+            //검사 시작할 인덱스 색출
+            while (true)
+            {
+                //찾았으면 ++, 검사 시작
+                if (omokBoard.boardData[x, index].Occupier == currentTurn)
+                {
+                    linkCount++;
+                    failureCount = 0;
+                    break;
+                }
+
+                //못 찾았으면 다음 걸 보고
+                index++;
+
+                //끝까지 못 찾으면 검사 종료
+                if (index >= column) break;
+
+                failureCount++;
+                if (failureCount >= column) return false;
+            }
+
+            while (true)
+            {
+                //다음 걸 보고
+                index++;
+
+                //다 봤으면 검사 종료
+                if (index >= column) break;
+
+                //돌 있으면 ++
+                if (omokBoard.boardData[x, index].Occupier == currentTurn) linkCount++;
+                //끊겨 있으면
+                else
+                {
+                    //끊긴 시점에서 연결된 돌 수 확인
+                    if (linkCount >= 5) return true;
+
+                    //안 끝났으면 카운트 0, 검사 재개
+                    linkCount = 0;
+                    break;
+                }
+            }
+
+            if (index >= column) break;
         }
+
+        if (linkCount >= 5) return true;
+
+        return false;
     }
 
-    private bool CheckZAvailable(int z)
+    private bool CheckRowCompletion(int z)
     {
-        if ((z < 0) || (z >= omokBoard.tilesColumn)) return false;
+        linkCount = 0;
 
-        return true;
-    }
+        int index = 0;
+        int row = omokBoard.tilesRow;
 
-    private bool CheckXAvailable(int x)
-    {
-        if ((x < 0) || (x >= omokBoard.tilesRow)) return false;
+        while (true)
+        {
+            int failureCount = 0;
 
-        return true;
-    }
+            //검사 시작할 인덱스 색출
+            while(true)
+            {
+                //찾았으면 ++, 검사 시작
+                if (omokBoard.boardData[index, z].Occupier == currentTurn)
+                {
+                    linkCount++;
+                    failureCount = 0;
+                    break;
+                }
 
-    private bool CheckIndexAvailable(int x, int z)
-    {
-        if ((x < 0) || (x >= omokBoard.tilesRow) || (z < 0) || (z >= omokBoard.tilesColumn)) return false;
+                //못 찾았으면 다음 걸 보고
+                index++;
 
-        return true;
+                //끝까지 못 찾으면 검사 종료
+                if (index >= row) break;
+
+                failureCount++;
+                if (failureCount >= row) return false;
+            }
+
+            while (true)
+            {
+                //다음 걸 보고
+                index++;
+
+                //다 봤으면 검사 종료
+                if (index >= row) break;
+
+                //돌 있으면 ++
+                if (omokBoard.boardData[index, z].Occupier == currentTurn) linkCount++;
+                //끊겨 있으면
+                else
+                {
+                    //끊긴 시점에서 연결된 돌 수 확인
+                    if (linkCount >= 5) return true;
+
+                    //안 끝났으면 카운트 0, 검사 재개
+                    linkCount = 0;
+                    break;
+                }
+            }
+
+            if (index >= row) break;
+        }
+
+        if (linkCount >= 5) return true;
+
+        return false;
     }
 }
