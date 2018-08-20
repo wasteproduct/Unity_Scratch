@@ -6,6 +6,11 @@ using UnityEngine;
 [RequireComponent(typeof(MeshRenderer))]
 [RequireComponent(typeof(MeshCollider))]
 public class Scratch_Map : MonoBehaviour {
+    public int tilesRow;
+    public int tilesColumn;
+
+    [HideInInspector]
+    public Scratch_TileData[,] tilesData;
 
 	// Use this for initialization
 	void Start () {
@@ -19,6 +24,6 @@ public class Scratch_Map : MonoBehaviour {
 
     public void CreateMap()
     {
-
+        tilesData = new Scratch_TileData[tilesRow, tilesColumn];
     }
 }
