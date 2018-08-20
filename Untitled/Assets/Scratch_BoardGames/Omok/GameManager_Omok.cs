@@ -10,7 +10,6 @@ public class GameManager_Omok : MonoBehaviour {
     private Omok_BoardTile.TileOccupation currentTurn;
     private int linkCount;
     private bool gameOver;
-    private readonly int invalidIndex = -1;
 
 	// Use this for initialization
 	void Start () {
@@ -80,7 +79,7 @@ public class GameManager_Omok : MonoBehaviour {
         return false;
     }
 
-    private bool CheckDirectProportional(int x, int z)
+    private bool CheckInverseProportional(int x, int z)
     {
         linkCount = 0;
 
@@ -90,9 +89,12 @@ public class GameManager_Omok : MonoBehaviour {
         int column = omokBoard.tilesColumn;
 
         //인덱스 초기화
-        while(true)
+        while (true)
         {
-            if((xIndex<=0)||(zIndex<=0))
+            if ((xIndex <= 0) || (zIndex >= column - 1)) break;
+
+            xIndex--;
+            zIndex++;
         }
 
         while (true)
@@ -103,7 +105,7 @@ public class GameManager_Omok : MonoBehaviour {
             while (true)
             {
                 //찾았으면 ++, 검사 시작
-                if (omokBoard.boardData[x, index].Occupier == currentTurn)
+                if (omokBoard.boardData[xIndex, zIndex].Occupier == currentTurn)
                 {
                     linkCount++;
                     failureCount = 0;
@@ -111,10 +113,11 @@ public class GameManager_Omok : MonoBehaviour {
                 }
 
                 //못 찾았으면 다음 걸 보고
-                index++;
+                xIndex++;
+                zIndex--;
 
                 //끝까지 못 찾으면 검사 종료
-                if (index >= column) break;
+                if ((xIndex >= row) || (zIndex <= 0)) break;
 
                 failureCount++;
                 if (failureCount >= column) return false;
@@ -123,13 +126,14 @@ public class GameManager_Omok : MonoBehaviour {
             while (true)
             {
                 //다음 걸 보고
-                index++;
+                xIndex++;
+                zIndex--;
 
                 //다 봤으면 검사 종료
-                if (index >= column) break;
+                if ((xIndex >= row) || (zIndex <= 0)) break;
 
                 //돌 있으면 ++
-                if (omokBoard.boardData[x, index].Occupier == currentTurn) linkCount++;
+                if (omokBoard.boardData[xIndex, zIndex].Occupier == currentTurn) linkCount++;
                 //끊겨 있으면
                 else
                 {
@@ -142,7 +146,82 @@ public class GameManager_Omok : MonoBehaviour {
                 }
             }
 
-            if (index >= column) break;
+            if ((xIndex >= row) || (zIndex <= 0)) break;
+        }
+
+        if (linkCount >= 5) return true;
+
+        return false;
+    }
+
+    private bool CheckDirectProportional(int x, int z)
+    {
+        linkCount = 0;
+
+        int xIndex = x;
+        int zIndex = z;
+        int row = omokBoard.tilesRow;
+        int column = omokBoard.tilesColumn;
+
+        //인덱스 초기화
+        while(true)
+        {
+            if ((xIndex <= 0) || (zIndex <= 0)) break;
+
+            xIndex--;
+            zIndex--;
+        }
+
+        while (true)
+        {
+            int failureCount = 0;
+
+            //검사 시작할 인덱스 색출
+            while (true)
+            {
+                //찾았으면 ++, 검사 시작
+                if (omokBoard.boardData[xIndex, zIndex].Occupier == currentTurn)
+                {
+                    linkCount++;
+                    failureCount = 0;
+                    break;
+                }
+
+                //못 찾았으면 다음 걸 보고
+                xIndex++;
+                zIndex++;
+
+                //끝까지 못 찾으면 검사 종료
+                if ((xIndex >= row) || (zIndex >= column)) break;
+
+                failureCount++;
+                if (failureCount >= column) return false;
+            }
+
+            while (true)
+            {
+                //다음 걸 보고
+                xIndex++;
+                zIndex++;
+
+                //다 봤으면 검사 종료
+                if ((xIndex >= row) || (zIndex >= column)) break;
+
+                //돌 있으면 ++
+                if (omokBoard.boardData[xIndex, zIndex].Occupier == currentTurn) linkCount++;
+                //끊겨 있으면
+                else
+                {
+                    //끊긴 시점에서 연결된 돌 수 확인
+                    if (linkCount >= 5) return true;
+
+                    //안 끝났으면 카운트 0, 검사 재개
+                    linkCount = 0;
+                    break;
+                }
+            }
+
+            if ((xIndex >= row) || (zIndex >= column)) break;
         }
 
         if (linkCount >= 5) return true;
