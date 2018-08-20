@@ -2,6 +2,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+[RequireComponent(typeof(MeshFilter))]
+[RequireComponent(typeof(MeshRenderer))]
+[RequireComponent(typeof(MeshCollider))]
 public class Scratch_Map : MonoBehaviour {
 
 	// Use this for initialization
@@ -14,7 +17,7 @@ public class Scratch_Map : MonoBehaviour {
 		
 	}
 
-    private void CreateMap()
+    public void CreateMap()
     {
 
     }
