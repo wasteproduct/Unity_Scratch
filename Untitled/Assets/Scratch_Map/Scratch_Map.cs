@@ -1,16 +1,16 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using MapData;
 
+[ExecuteInEditMode]
 [RequireComponent(typeof(MeshFilter))]
 [RequireComponent(typeof(MeshRenderer))]
 [RequireComponent(typeof(MeshCollider))]
 public class Scratch_Map : MonoBehaviour {
     public int tilesRow;
     public int tilesColumn;
-
-    [HideInInspector]
-    public Scratch_TileData[,] tilesData;
+    public GameObject dungeonFloor;
 
 	// Use this for initialization
 	void Start () {
@@ -24,6 +24,30 @@ public class Scratch_Map : MonoBehaviour {
 
     public void CreateMap()
     {
-        tilesData = new Scratch_TileData[tilesRow, tilesColumn];
+        MapData = new Scratch_MapData(tilesRow, tilesColumn);
+
+        SetMeshes();
     }
+
+    private void SetMeshes()
+    {
+        for (int z = 0; z < tilesColumn; z++)
+        {
+            for (int x = 0; x < tilesRow; x++)
+            {
+                switch (MapData.TileData[x, z].Type)
+                {
+                    case TileData.TileType.None:
+                        break;
+                    case TileData.TileType.Floor:
+                        Instantiate<GameObject>(dungeonFloor, new Vector3((float)x, 0.0f, (float)z), Quaternion.identity, this.transform);
+                        break;
+                    case TileData.TileType.Wall:
+                        break;
+                }
+            }
+        }
+    }
+
+    public Scratch_MapData MapData { get; private set; }
 }

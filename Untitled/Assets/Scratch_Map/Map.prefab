@@ -112,3 +112,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   tilesRow: 0
   tilesColumn: 0
+  dungeonFloor: {fileID: 1109993027531044, guid: fddb67444cd3daa4ba7ad0c0029c5dec,
+    type: 2}
