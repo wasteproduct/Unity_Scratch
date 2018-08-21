@@ -4,6 +4,46 @@ using TileData;
 
 namespace MapData
 {
+    public class Room
+    {
+        private readonly int width, height;
+
+        public Room(int startingTileX, int startingTileZ, int roomWidth, int roomHeight)
+        {
+            X = startingTileX;
+            Z = startingTileZ;
+
+            width = roomWidth;
+            height = roomHeight;
+
+            Right = X + width - 1;
+            Top = Z + height - 1;
+
+            CenterX = X + width / 2;
+            CenterZ = Z + height / 2;
+
+            Connected = false;
+        }
+
+        public int X { get; private set; }
+        public int Z { get; private set; }
+        public int Right { get; private set; }
+        public int Top { get; private set; }
+        public int CenterX { get; private set; }
+        public int CenterZ { get; private set; }
+        public bool Connected { get; set; }
+
+        public bool RoomsOverlapping(Room room)
+        {
+            if (this.X > room.Right + 1) return false;
+            if (this.Right < room.X - 1) return false;
+            if (this.Z > room.Top + 1) return false;
+            if (this.Top < room.Z - 1) return false;
+
+            return true;
+        }
+    }
+
     public class Scratch_MapData
     {
         private readonly int row, column;
@@ -84,7 +124,36 @@ namespace MapData
 
         private void ConnectRooms(List<Room> rooms)
         {
+            for (int i = 0; i < rooms.Count - 1; i++)
+            {
+                if (rooms[i].Connected == true) continue;
 
+                int x = rooms[i].CenterX;
+                int z = rooms[i].CenterZ;
+
+                int xIncrementor = (x < rooms[i + 1].CenterX) ? 1 : -1;
+                int zIncrementor = (z < rooms[i + 1].CenterZ) ? 1 : -1;
+
+                while (true)
+                {
+                    if (TileData[x, z].Type != TileType.Floor) TileData[x, z].UpdateTile(TileType.Floor);
+
+                    if (x == rooms[i + 1].CenterX) break;
+
+                    x += xIncrementor;
+                }
+
+                while (true)
+                {
+                    if (TileData[x, z].Type != TileType.Floor) TileData[x, z].UpdateTile(TileType.Floor);
+
+                    if (z == rooms[i + 1].CenterZ) break;
+
+                    z += zIncrementor;
+                }
+
+                rooms[i].Connected = true;
+            }
         }
 
         private void SetTileData()
