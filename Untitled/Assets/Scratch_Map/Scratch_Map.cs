@@ -7,20 +7,44 @@ using MapData;
 [RequireComponent(typeof(MeshFilter))]
 [RequireComponent(typeof(MeshRenderer))]
 [RequireComponent(typeof(MeshCollider))]
-public class Scratch_Map : MonoBehaviour {
-    public int tilesRow;
-    public int tilesColumn;
+public class Scratch_Map : MonoBehaviour
+{
+    public enum MapSize
+    {
+        Small,
+        Medium,
+        Large
+    }
+
+    public MapSize mapSize;
     public GameObject dungeonFloor;
 
-	// Use this for initialization
-	void Start () {
+    [HideInInspector]
+    public int tilesRow, tilesColumn, roomsNumber;
+
+    // Use this for initialization
+    void Start()
+    {
+        switch (mapSize)
+        {
+            case MapSize.Small:
+                tilesRow = tilesColumn = 64;
+                break;
+            case MapSize.Medium:
+                tilesRow = tilesColumn = 128;
+                break;
+            case MapSize.Large:
+                break;
+        }
+
         CreateMap();
-	}
-	
-	// Update is called once per frame
-	void Update () {
-		
-	}
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
+
+    }
 
     public void CreateMap()
     {

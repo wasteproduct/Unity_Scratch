@@ -4,6 +4,7 @@
     {
         None,
         Floor,
+        Door,
         Wall
     }
 
@@ -12,9 +13,11 @@
         public Scratch_TileData()
         {
             Type = TileType.None;
+            DoorOpened = false;
         }
 
         public TileType Type { get; private set; }
+        public bool DoorOpened { get; private set; }
 
         public void UpdateTile(TileType newType)
         {

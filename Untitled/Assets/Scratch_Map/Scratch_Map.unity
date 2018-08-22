@@ -301,12 +301,17 @@ Prefab:
     - target: {fileID: 114772919600958770, guid: 82e503298cc2ea143883a2e871048800,
         type: 2}
       propertyPath: tilesRow
-      value: 32
+      value: 64
       objectReference: {fileID: 0}
     - target: {fileID: 114772919600958770, guid: 82e503298cc2ea143883a2e871048800,
         type: 2}
       propertyPath: tilesColumn
-      value: 32
+      value: 64
+      objectReference: {fileID: 0}
+    - target: {fileID: 114772919600958770, guid: 82e503298cc2ea143883a2e871048800,
+        type: 2}
+      propertyPath: mapSize
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 82e503298cc2ea143883a2e871048800, type: 2}
