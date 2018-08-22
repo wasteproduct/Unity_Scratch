@@ -1,25 +1,20 @@
 ﻿namespace RoomData
 {
-    //public enum AreaIdentity
-    //{
-    //    Room,
-    //    Hallway
-    //}
+    public class RoomMetaData
+    {
+        public RoomMetaData()
+        {
+            MinimumRoomWidth = 16;
+            MaximumRoomWidth = 26;
+            MinimumRoomHeight = 16;
+            MaximumRoomHeight = 26;
+        }
 
-    //public class MapArea
-    //{
-    //    public MapArea(int x, int z)
-    //    {
-    //        Identity = AreaIdentity.Hallway;
-
-    //        X = x;
-    //        Z = z;
-    //    }
-
-    //    public AreaIdentity Identity { get; set; }
-    //    public int X { get; private set; }
-    //    public int Z { get; private set; }
-    //}
+        public int MinimumRoomWidth { get; private set; }
+        public int MaximumRoomWidth { get; private set; }
+        public int MinimumRoomHeight { get; private set; }
+        public int MaximumRoomHeight { get; private set; }
+    }
 
     public class Room
     {
@@ -52,10 +47,10 @@
 
         public bool RoomsOverlapping(Room room)
         {
-            if (this.X > room.Right + 1) return false;
-            if (this.Right < room.X - 1) return false;
-            if (this.Z > room.Top + 1) return false;
-            if (this.Top < room.Z - 1) return false;
+            if (this.X > room.Right + 6) return false;
+            if (this.Right < room.X - 6) return false;
+            if (this.Z > room.Top + 6) return false;
+            if (this.Top < room.Z - 6) return false;
 
             return true;
         }

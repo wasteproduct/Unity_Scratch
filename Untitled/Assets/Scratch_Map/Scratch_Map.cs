@@ -9,34 +9,12 @@ using MapData;
 [RequireComponent(typeof(MeshCollider))]
 public class Scratch_Map : MonoBehaviour
 {
-    public enum MapSize
-    {
-        Small,
-        Medium,
-        Large
-    }
-
     public MapSize mapSize;
     public GameObject dungeonFloor;
-
-    [HideInInspector]
-    public int tilesRow, tilesColumn, roomsNumber;
 
     // Use this for initialization
     void Start()
     {
-        switch (mapSize)
-        {
-            case MapSize.Small:
-                tilesRow = tilesColumn = 64;
-                break;
-            case MapSize.Medium:
-                tilesRow = tilesColumn = 128;
-                break;
-            case MapSize.Large:
-                break;
-        }
-
         CreateMap();
     }
 
@@ -48,16 +26,16 @@ public class Scratch_Map : MonoBehaviour
 
     public void CreateMap()
     {
-        MapData = new Scratch_MapData(tilesRow, tilesColumn);
+        MapData = new Scratch_MapData(mapSize);
 
         SetMeshes();
     }
 
     private void SetMeshes()
     {
-        for (int z = 0; z < tilesColumn; z++)
+        for (int z = 0; z < MapData.TilesColumn; z++)
         {
-            for (int x = 0; x < tilesRow; x++)
+            for (int x = 0; x < MapData.TilesRow; x++)
             {
                 switch (MapData.TileData[x, z].Type)
                 {
