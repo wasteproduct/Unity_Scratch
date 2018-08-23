@@ -3,6 +3,18 @@ using UnityEngine;
 
 [CustomEditor(typeof(Scratch_Map))]
 public class MapInspector : Editor{
+    private Scratch_Map map;
+
+    private void OnEnable()
+    {
+        map = target as Scratch_Map;
+    }
+
+    private void OnDisable()
+    {
+        map = null;
+    }
+
     public override void OnInspectorGUI()
     {
         //base.OnInspectorGUI();
@@ -11,7 +23,11 @@ public class MapInspector : Editor{
 
         if (GUILayout.Button("Regenerate"))
         {
-            Scratch_Map map = (Scratch_Map)target;
+            for (int i = map.transform.childCount - 1; i >= 0; i--)
+            {
+                GameObject.DestroyImmediate(map.transform.GetChild(i).gameObject);
+            }
+            
             map.CreateMap();
         }
     }

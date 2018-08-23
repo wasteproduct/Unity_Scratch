@@ -70,6 +70,74 @@ namespace MapData
             SetRooms(rooms);
 
             ConnectRooms(rooms);
+
+            SetWalls();
+        }
+
+        private void SetWalls()
+        {
+            for (int z = 0; z < TilesColumn; z++)
+            {
+                for (int x = 0; x < TilesRow; x++)
+                {
+                    if (TileData[x, z].Type == TileType.Floor) continue;
+
+                    int upper = z + 1;
+                    int lower = z - 1;
+                    int left = x - 1;
+                    int right = x + 1;
+
+                    if (ColumnIndexAvailable(upper) == true)
+                    {
+                        if (TileData[x, upper].Type == TileType.Floor)
+                        {
+                            TileData[x, z].UpdateTile(TileType.Wall);
+                            TileData[x, z].UpdateWallDirection(x, z, x, upper);
+                        }
+                    }
+
+                    if (ColumnIndexAvailable(lower) == true)
+                    {
+                        if (TileData[x, lower].Type == TileType.Floor)
+                        {
+                            TileData[x, z].UpdateTile(TileType.Wall);
+                            TileData[x, z].UpdateWallDirection(x, z, x, lower);
+                        }
+                    }
+
+                    if (RowIndexAvailable(left) == true)
+                    {
+                        if (TileData[left, z].Type == TileType.Floor)
+                        {
+                            TileData[x, z].UpdateTile(TileType.Wall);
+                            TileData[x, z].UpdateWallDirection(x, z, left, z);
+                        }
+                    }
+
+                    if (RowIndexAvailable(right) == true)
+                    {
+                        if (TileData[right, z].Type == TileType.Floor)
+                        {
+                            TileData[x, z].UpdateTile(TileType.Wall);
+                            TileData[x, z].UpdateWallDirection(x, z, right, z);
+                        }
+                    }
+                }
+            }
+        }
+
+        private bool RowIndexAvailable(int x)
+        {
+            if ((x < 0) || (x >= TilesRow)) return false;
+
+            return true;
+        }
+
+        private bool ColumnIndexAvailable(int z)
+        {
+            if ((z < 0) || (z >= TilesColumn)) return false;
+
+            return true;
         }
 
         private void ConnectRooms(List<Room> rooms)

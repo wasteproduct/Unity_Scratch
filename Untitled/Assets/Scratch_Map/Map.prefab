@@ -110,7 +110,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d7da0eaf2b8eefd4da8f3ab192d582c3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  tilesRow: 0
-  tilesColumn: 0
+  mapSize: 0
   dungeonFloor: {fileID: 1109993027531044, guid: fddb67444cd3daa4ba7ad0c0029c5dec,
+    type: 2}
+  dungeonWall: {fileID: 1008929361489948, guid: e0c059bf912fb1744a037d13a3d63466,
     type: 2}
