@@ -16,7 +16,7 @@ public class Scratch_Map : MonoBehaviour
     // Use this for initialization
     void Start()
     {
-        //CreateMap();
+        CreateMap();
     }
 
     // Update is called once per frame
@@ -31,23 +31,49 @@ public class Scratch_Map : MonoBehaviour
     {
         MapData = new Scratch_MapData(mapSize);
 
+        ClearOldMeshes();
+
         SetMeshes();
 
         CombineMeshes();
     }
 
+    public void ClearOldMeshes()
+    {
+        //Destroy(this.GetComponent<MeshFilter>().mesh);
+        DestroyImmediate(this.GetComponent<MeshFilter>().sharedMesh);
+        this.GetComponent<MeshFilter>().sharedMesh = null;
+
+        for (int i = this.transform.childCount - 1; i >= 0; i--)
+        {
+            //Destroy(this.transform.GetChild(i).gameObject);
+            DestroyImmediate(this.transform.GetChild(i).gameObject);
+        }
+    }
+
     private void CombineMeshes()
     {
-        MeshFilter meshFilter = GetComponent<MeshFilter>();
-        meshFilter.mesh.Clear();
-
-        MeshFilter[] meshFilters = GetComponentsInChildren<MeshFilter>();
-        //this.GetComponent<MeshRenderer>().material = meshFilters[0].GetComponent<MeshRenderer>().sharedMaterial;
+        MeshFilter[] meshFilters = this.GetComponentsInChildren<MeshFilter>(true);
 
         CombineInstance[] instances = new CombineInstance[meshFilters.Length];
 
+        for (int i = 0; i < meshFilters.Length; i++)
+        {
+            instances[i].mesh = meshFilters[i].sharedMesh;
+            instances[i].transform = meshFilters[i].transform.localToWorldMatrix;
+        }
+
         Mesh combinedMesh = new Mesh();
 
+        combinedMesh.CombineMeshes(instances, true);
+
+        this.GetComponent<MeshFilter>().mesh = combinedMesh;
+
+        for (int i = this.transform.childCount - 1; i >= 0; i--)
+        {
+            //Destroy(this.transform.GetChild(i).gameObject);
+            DestroyImmediate(this.transform.GetChild(i).gameObject);
+        }
     }
 
     private void SetMeshes()
