@@ -31,14 +31,14 @@ public class Scratch_Map : MonoBehaviour
     {
         MapData = new Scratch_MapData(mapSize);
 
-        ClearOldMeshes();
+        ClearAll();
 
         SetMeshes();
 
         CombineMeshes();
     }
 
-    public void ClearOldMeshes()
+    public void ClearAll()
     {
         //Destroy(this.GetComponent<MeshFilter>().mesh);
         DestroyImmediate(this.GetComponent<MeshFilter>().sharedMesh);
@@ -57,17 +57,60 @@ public class Scratch_Map : MonoBehaviour
 
         CombineInstance[] instances = new CombineInstance[meshFilters.Length];
 
+        List<CombineInstance> floors = new List<CombineInstance>();
+        List<CombineInstance> walls = new List<CombineInstance>();
+        List<Material> materials = new List<Material>();
+
+        Material floorMaterial = null;
+        Material wallMaterial = null;
+
         for (int i = 0; i < meshFilters.Length; i++)
         {
+            if (meshFilters[i].transform == this.transform) continue;
+
+            instances[i] = new CombineInstance();
+
             instances[i].mesh = meshFilters[i].sharedMesh;
             instances[i].transform = meshFilters[i].transform.localToWorldMatrix;
+
+            if (meshFilters[i].GetComponent<MeshRenderer>().sharedMaterial.name == "floor_A")
+            {
+                floorMaterial = meshFilters[i].GetComponent<MeshRenderer>().sharedMaterial;
+                floors.Add(instances[i]);
+            }
+            else if (meshFilters[i].GetComponent<MeshRenderer>().sharedMaterial.name == "wall_A")
+            {
+                wallMaterial = meshFilters[i].GetComponent<MeshRenderer>().sharedMaterial;
+                walls.Add(instances[i]);
+            }
         }
 
-        Mesh combinedMesh = new Mesh();
+        materials.Add(floorMaterial);
+        materials.Add(wallMaterial);
 
-        combinedMesh.CombineMeshes(instances, true);
+        Mesh combinedFloor = new Mesh();
+        combinedFloor.CombineMeshes(floors.ToArray());
 
-        this.GetComponent<MeshFilter>().mesh = combinedMesh;
+        Mesh combinedWall = new Mesh();
+        combinedWall.CombineMeshes(walls.ToArray());
+
+        CombineInstance[] combinedInstances = new CombineInstance[2];
+        combinedInstances[0].mesh = combinedFloor;
+        combinedInstances[0].transform = this.transform.localToWorldMatrix;
+        combinedInstances[1].mesh = combinedWall;
+        combinedInstances[1].transform = this.transform.localToWorldMatrix;
+
+        Mesh ultimateMesh = new Mesh();
+        ultimateMesh.CombineMeshes(combinedInstances, false);
+
+        this.GetComponent<MeshRenderer>().sharedMaterials = new Material[2];
+
+        for (int i = 0; i < 2; i++)
+        {
+            this.GetComponent<MeshRenderer>().sharedMaterials = materials.ToArray();
+        }
+
+        this.GetComponent<MeshFilter>().mesh = ultimateMesh;
 
         for (int i = this.transform.childCount - 1; i >= 0; i--)
         {

@@ -28,7 +28,7 @@ public class MapInspector : Editor
             //{
             //    GameObject.DestroyImmediate(map.transform.GetChild(i).gameObject);
             //}
-            map.ClearOldMeshes();
+            map.ClearAll();
         }
 
         if (GUILayout.Button("Regenerate"))
