@@ -10,8 +10,10 @@ using MapData;
 public class Scratch_Map : MonoBehaviour
 {
     public MapSize mapSize;
+    public GameObject debugTile;
     public GameObject dungeonFloor;
     public GameObject dungeonWall;
+    public GameObject dungeonDoor;
 
     // Use this for initialization
     void Start()
@@ -36,6 +38,8 @@ public class Scratch_Map : MonoBehaviour
         SetMeshes();
 
         CombineMeshes();
+
+        SetObjects();
     }
 
     public void ClearAll()
@@ -48,6 +52,41 @@ public class Scratch_Map : MonoBehaviour
         {
             //Destroy(this.transform.GetChild(i).gameObject);
             DestroyImmediate(this.transform.GetChild(i).gameObject);
+        }
+    }
+
+    private void SetObjects()
+    {
+        for (int i = 0; i < MapData.Doors.Count; i++)
+        {
+            Quaternion wallDirection = Quaternion.identity;
+
+            switch (MapData.Doors[i].Direction[0])
+            {
+                case TileData.WallDirection.Left:
+                    wallDirection = Quaternion.Euler(0.0f, 90.0f, 0.0f);
+                    break;
+                case TileData.WallDirection.Right:
+                    wallDirection = Quaternion.Euler(0.0f, -90.0f, 0.0f);
+                    break;
+                case TileData.WallDirection.There:
+                    wallDirection = Quaternion.Euler(0.0f, 180.0f, 0.0f);
+                    break;
+            }
+
+            Instantiate<GameObject>(dungeonDoor, new Vector3((float)MapData.Doors[i].X + .5f, 0.0f, (float)MapData.Doors[i].Z + .5f), wallDirection, this.transform);
+            Instantiate<GameObject>(debugTile, new Vector3((float)MapData.Doors[i].X, 0.0f, (float)MapData.Doors[i].Z), Quaternion.identity, this.transform);
+        }
+
+        for(int z=0;z<MapData.TilesColumn;z++)
+        {
+            for(int x=0;x<MapData.TilesRow;x++)
+            {
+                if(MapData.TileData[x,z].Type==TileData.TileType.DoorWall)
+                {
+                    Instantiate<GameObject>(debugTile, new Vector3((float)x, 0.0f, (float)z), Quaternion.identity, this.transform);
+                }
+            }
         }
     }
 
@@ -130,6 +169,9 @@ public class Scratch_Map : MonoBehaviour
                     case TileData.TileType.None:
                         break;
                     case TileData.TileType.Floor:
+                        Instantiate<GameObject>(dungeonFloor, new Vector3((float)x, 0.0f, (float)z), Quaternion.identity, this.transform);
+                        break;
+                    case TileData.TileType.Door:
                         Instantiate<GameObject>(dungeonFloor, new Vector3((float)x, 0.0f, (float)z), Quaternion.identity, this.transform);
                         break;
                     case TileData.TileType.Wall:

@@ -7,6 +7,7 @@ namespace TileData
         None,
         Floor,
         Door,
+        DoorWall,
         Wall
     }
 
@@ -21,21 +22,30 @@ namespace TileData
 
     public class Scratch_TileData
     {
-        public Scratch_TileData()
+        public Scratch_TileData(int x, int z)
         {
+            X = x;
+            Z = z;
             Type = TileType.None;
             DoorOpened = false;
             Direction = new List<WallDirection>();
         }
 
+        public int X { get; private set; }
+        public int Z { get; private set; }
         public TileType Type { get; private set; }
         public bool DoorOpened { get; private set; }
-        // Direction of wall
+        // Direction of wall / door
         public List<WallDirection> Direction { get; private set; }
 
         public void UpdateTile(TileType newType)
         {
             Type = newType;
+        }
+
+        public void UpdateDoorDirection(WallDirection doorDirection)
+        {
+            Direction.Add(doorDirection);
         }
 
         public void UpdateWallDirection(int wallX, int wallZ, int adjacentFloorX, int adjacentFloorZ)

@@ -19,7 +19,7 @@ namespace MapData
             X = x;
             Z = z;
         }
-        
+
         public int X { get; private set; }
         public int Z { get; private set; }
     }
@@ -27,52 +27,45 @@ namespace MapData
     public class Scratch_MapData
     {
         private readonly int areaTilesRow, areaTilesColumn;
+        private readonly int areasRow, areasColumn;
+        private readonly int invalidIndex = -1;
 
         public Scratch_MapData(MapSize mapSize)
         {
             areaTilesRow = areaTilesColumn = 32;
 
-            int areasRow = 0;
-            int areasColumn = 0;
-
-            MapArea[,] area = SetAreas(ref areasRow, ref areasColumn, mapSize);
-            
-            SetTileData(areasRow, areasColumn);
-
-            RoomMetaData roomsMetaData = new RoomMetaData();
-
-            CreateRooms(areasRow, areasColumn, area, roomsMetaData);
-        }
-
-        public int TilesRow { get; private set; }
-        public int TilesColumn { get; private set; }
-        public Scratch_TileData[,] TileData { get; private set; }
-
-        private void CreateRooms(int areasRow, int areasColumn, MapArea[,] area, RoomMetaData roomsMetaData)
-        {
-            List<Room> rooms = new List<Room>();
-
-            for (int z = 0; z < areasColumn; z++)
+            switch (mapSize)
             {
-                for (int x = 0; x < areasRow; x++)
-                {
-                    int roomX = Random.Range(area[x, z].X + 3, area[x, z].X + 8);
-                    int roomZ = Random.Range(area[x, z].Z + 3, area[x, z].Z + 8);
-                    int roomWidth = Random.Range(roomsMetaData.MinimumRoomWidth, roomsMetaData.MaximumRoomWidth);
-                    int roomHeight = Random.Range(roomsMetaData.MinimumRoomHeight, roomsMetaData.MaximumRoomHeight);
-
-                    Room newRoom = new Room(roomX, roomZ, roomWidth, roomHeight);
-
-                    rooms.Add(newRoom);
-                }
+                case MapSize.Small:
+                    areasRow = areasColumn = 2;
+                    break;
+                case MapSize.Medium:
+                    areasRow = areasColumn = 3;
+                    break;
+                case MapSize.Large:
+                    areasRow = areasColumn = 4;
+                    break;
             }
 
+            List<MapArea> area = SetAreas(mapSize);
+
+            SetTileData();
+
+            List<Room> rooms = CreateRooms(area);
+
             SetRooms(rooms);
+
+            SetDoors(area, rooms);
 
             ConnectRooms(rooms);
 
             SetWalls();
         }
+
+        public int TilesRow { get; private set; }
+        public int TilesColumn { get; private set; }
+        public Scratch_TileData[,] TileData { get; private set; }
+        public List<Scratch_TileData> Doors { get; private set; }
 
         private void SetWalls()
         {
@@ -80,7 +73,7 @@ namespace MapData
             {
                 for (int x = 0; x < TilesRow; x++)
                 {
-                    if (TileData[x, z].Type == TileType.Floor) continue;
+                    if ((TileData[x, z].Type == TileType.Floor) || (TileData[x, z].Type == TileType.Door)) continue;
 
                     int upper = z + 1;
                     int lower = z - 1;
@@ -124,20 +117,29 @@ namespace MapData
                     }
                 }
             }
-        }
 
-        private bool RowIndexAvailable(int x)
-        {
-            if ((x < 0) || (x >= TilesRow)) return false;
-
-            return true;
-        }
-
-        private bool ColumnIndexAvailable(int z)
-        {
-            if ((z < 0) || (z >= TilesColumn)) return false;
-
-            return true;
+            for(int i=0;i<Doors.Count;i++)
+            {
+                switch(Doors[i].Direction[0])
+                {
+                    case WallDirection.Left:
+                        TileData[Doors[i].X, Doors[i].Z - 1].UpdateTile(TileType.DoorWall);
+                        TileData[Doors[i].X, Doors[i].Z + 1].UpdateTile(TileType.DoorWall);
+                        break;
+                    case WallDirection.Right:
+                        TileData[Doors[i].X, Doors[i].Z + 1].UpdateTile(TileType.DoorWall);
+                        TileData[Doors[i].X, Doors[i].Z - 1].UpdateTile(TileType.DoorWall);
+                        break;
+                    case WallDirection.Here:
+                        TileData[Doors[i].X + 1, Doors[i].Z].UpdateTile(TileType.DoorWall);
+                        TileData[Doors[i].X - 1, Doors[i].Z].UpdateTile(TileType.DoorWall);
+                        break;
+                    case WallDirection.There:
+                        TileData[Doors[i].X - 1, Doors[i].Z].UpdateTile(TileType.DoorWall);
+                        TileData[Doors[i].X + 1, Doors[i].Z].UpdateTile(TileType.DoorWall);
+                        break;
+                }
+            }
         }
 
         private void ConnectRooms(List<Room> rooms)
@@ -162,13 +164,14 @@ namespace MapData
 
                     if (TileData[x, z].Type == TileType.Floor) continue;
 
-                    TileData[x, z].UpdateTile(TileType.Floor);
-
                     int upperZ = z + 1;
                     if (upperZ < TilesColumn) TileData[x, upperZ].UpdateTile(TileType.Floor);
 
                     int lowerZ = z - 1;
                     if (lowerZ >= 0) TileData[x, lowerZ].UpdateTile(TileType.Floor);
+
+                    if (TileData[x, z].Type == TileType.Door) continue;
+                    TileData[x, z].UpdateTile(TileType.Floor);
                 }
 
                 while (true)
@@ -179,17 +182,178 @@ namespace MapData
 
                     if (TileData[x, z].Type == TileType.Floor) continue;
 
-                    TileData[x, z].UpdateTile(TileType.Floor);
-
                     int leftX = x - 1;
                     if (leftX >= 0) TileData[leftX, z].UpdateTile(TileType.Floor);
 
                     int rightX = x + 1;
                     if (rightX < TilesRow) TileData[rightX, z].UpdateTile(TileType.Floor);
+
+                    if (TileData[x, z].Type == TileType.Door) continue;
+                    TileData[x, z].UpdateTile(TileType.Floor);
                 }
 
                 rooms[i].Connected = true;
             }
+        }
+
+        private void SetDoors(List<MapArea> area, List<Room> rooms)
+        {
+            Doors = new List<Scratch_TileData>();
+
+            int current = 0;
+
+            while (true)
+            {
+                SetDoorToPreviousRoom(current - 1, current, area, rooms);
+                SetDoorToNextRoom(current, current + 1, area, rooms);
+
+                current++;
+
+                if (current >= area.Count) break;
+            }
+        }
+
+        private void SetDoorToNextRoom(int current, int next, List<MapArea> area, List<Room> rooms)
+        {
+            if (next >= area.Count) return;
+
+            const int horizontal = -1;
+            const int vertical = 1;
+
+            int direction = 0;
+            direction = (area[current].Z == area[next].Z) ? horizontal : vertical;
+
+            int doorX = invalidIndex;
+            int doorZ = invalidIndex;
+            WallDirection doorDirection = WallDirection.None;
+
+            switch (direction)
+            {
+                case horizontal:
+                    doorDirection = (area[current].X < area[next].X) ? WallDirection.Right : WallDirection.Left;
+                    break;
+                case vertical:
+                    doorDirection = WallDirection.There;
+                    break;
+                default:
+                    Debug.Log("Direction was decided unsuccessfully.");
+                    return;
+            }
+
+            switch (doorDirection)
+            {
+                case WallDirection.Left:
+                    doorX = rooms[current].X - 1;
+                    doorZ = rooms[current].CenterZ;
+                    break;
+                case WallDirection.Right:
+                    doorX = rooms[current].Right + 1;
+                    doorZ = rooms[current].CenterZ;
+                    break;
+                case WallDirection.There:
+                    doorX = rooms[next].CenterX;
+                    doorZ = rooms[current].Top + 1;
+                    break;
+            }
+
+            if ((doorX == invalidIndex) || (doorZ == invalidIndex))
+            {
+                Debug.Log("Door indices were set unsuccessfully.");
+                return;
+            }
+
+            TileData[doorX, doorZ].UpdateTile(TileType.Door);
+            TileData[doorX, doorZ].UpdateDoorDirection(doorDirection);
+            Doors.Add(TileData[doorX, doorZ]);
+        }
+
+        private void SetDoorToPreviousRoom(int previous, int current, List<MapArea> area, List<Room> rooms)
+        {
+            if (previous < 0) return;
+
+            const int horizontal = -1;
+            const int vertical = 1;
+
+            int direction = 0;
+            direction = (area[previous].Z == area[current].Z) ? horizontal : vertical;
+
+            int doorX = invalidIndex;
+            int doorZ = invalidIndex;
+            WallDirection doorDirection = WallDirection.None;
+
+            switch (direction)
+            {
+                case horizontal:
+                    doorDirection = (area[previous].X < area[current].X) ? WallDirection.Left : WallDirection.Right;
+                    break;
+                case vertical:
+                    doorDirection = WallDirection.Here;
+                    break;
+                default:
+                    Debug.Log("Direction was decided unsuccessfully.");
+                    return;
+            }
+
+            switch(doorDirection)
+            {
+                case WallDirection.Left:
+                    doorX = rooms[current].X - 1;
+                    doorZ = rooms[previous].CenterZ;
+                    break;
+                case WallDirection.Right:
+                    doorX = rooms[current].Right + 1;
+                    doorZ = rooms[previous].CenterZ;
+                    break;
+                case WallDirection.Here:
+                    doorX = rooms[current].CenterX;
+                    doorZ = rooms[current].Z - 1;
+                    break;
+            }
+
+            if ((doorX == invalidIndex) || (doorZ == invalidIndex))
+            {
+                Debug.Log("Door indices were set unsuccessfully.");
+                return;
+            }
+
+            TileData[doorX, doorZ].UpdateTile(TileType.Door);
+            TileData[doorX, doorZ].UpdateDoorDirection(doorDirection);
+            Doors.Add(TileData[doorX, doorZ]);
+        }
+
+        private List<Room> CreateRooms(List<MapArea> area)
+        {
+            List<Room> rooms = new List<Room>();
+
+            RoomMetaData roomsMetaData = new RoomMetaData();
+
+            for (int i = 0; i < area.Count; i++)
+            {
+                int roomX = Random.Range(area[i].X + 3, area[i].X + 8);
+                int roomZ = Random.Range(area[i].Z + 3, area[i].Z + 8);
+                int roomWidth = Random.Range(roomsMetaData.MinimumRoomWidth, roomsMetaData.MaximumRoomWidth);
+                int roomHeight = Random.Range(roomsMetaData.MinimumRoomHeight, roomsMetaData.MaximumRoomHeight);
+
+                Room newRoom = new Room(roomX, roomZ, roomWidth, roomHeight);
+
+                rooms.Add(newRoom);
+            }
+
+            return rooms;
+        }
+
+        private bool RowIndexAvailable(int x)
+        {
+            if ((x < 0) || (x >= TilesRow)) return false;
+
+            return true;
+        }
+
+        private bool ColumnIndexAvailable(int z)
+        {
+            if ((z < 0) || (z >= TilesColumn)) return false;
+
+            return true;
         }
 
         private void SetRooms(List<Room> rooms)
@@ -206,7 +370,7 @@ namespace MapData
             }
         }
 
-        private void SetTileData(int areasRow, int areasColumn)
+        private void SetTileData()
         {
             TilesRow = areaTilesRow * areasRow;
             TilesColumn = areaTilesColumn * areasColumn;
@@ -216,34 +380,25 @@ namespace MapData
             {
                 for (int x = 0; x < TilesRow; x++)
                 {
-                    TileData[x, z] = new Scratch_TileData();
+                    TileData[x, z] = new Scratch_TileData(x, z);
                 }
             }
         }
 
-        private MapArea[,] SetAreas(ref int areasRow, ref int areasColumn, MapSize mapSize)
+        private List<MapArea> SetAreas(MapSize mapSize)
         {
-            switch (mapSize)
-            {
-                case MapSize.Small:
-                    areasRow = areasColumn = 2;
-                    break;
-                case MapSize.Medium:
-                    areasRow = areasColumn = 3;
-                    break;
-                case MapSize.Large:
-                    areasRow = areasColumn = 4;
-                    break;
-            }
-
-            MapArea[,] area = new MapArea[areasRow, areasColumn];
+            List<MapArea> area = new List<MapArea>();
 
             for (int z = 0; z < areasColumn; z++)
             {
                 for (int x = 0; x < areasRow; x++)
                 {
-                    if (z % 2 == 0) area[x, z] = new MapArea(x * areaTilesRow, z * areaTilesColumn);
-                    else area[x, z] = new MapArea((areasRow - 1 - x) * areaTilesRow, z * areaTilesColumn);
+                    int areaX = (z % 2 == 0) ? x * areaTilesRow : (areasRow - 1 - x) * areaTilesRow;
+                    int areaZ = z * areaTilesColumn;
+
+                    MapArea newArea = new MapArea(areaX, areaZ);
+
+                    area.Add(newArea);
                 }
             }
 
