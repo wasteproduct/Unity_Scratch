@@ -60,12 +60,15 @@ namespace MapData
             ConnectRooms(rooms);
 
             SetWalls();
+
+            StartingTile = TileData[rooms[0].CenterX, rooms[0].CenterZ];
         }
 
         public int TilesRow { get; private set; }
         public int TilesColumn { get; private set; }
         public Scratch_TileData[,] TileData { get; private set; }
         public List<Scratch_TileData> Doors { get; private set; }
+        public Scratch_TileData StartingTile { get; private set; }
 
         private void SetWalls()
         {
@@ -118,9 +121,9 @@ namespace MapData
                 }
             }
 
-            for(int i=0;i<Doors.Count;i++)
+            for (int i = 0; i < Doors.Count; i++)
             {
-                switch(Doors[i].Direction[0])
+                switch (Doors[i].Direction[0])
                 {
                     case WallDirection.Left:
                         TileData[Doors[i].X, Doors[i].Z - 1].UpdateTile(TileType.DoorWall);
@@ -294,7 +297,7 @@ namespace MapData
                     return;
             }
 
-            switch(doorDirection)
+            switch (doorDirection)
             {
                 case WallDirection.Left:
                     doorX = rooms[current].X - 1;
