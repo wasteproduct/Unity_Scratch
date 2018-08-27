@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
+using MapData;
+using TileData;
 
 namespace AStar
 {
@@ -9,10 +11,10 @@ namespace AStar
         private Node_AStar currentNode;
         private Node_AStar[,] node;
 
-        public Calculation_AStar(TileMap_MapData mapData)
+        public Scratch_AStar(Scratch_MapData mapData)
         {
-            row = mapData.row;
-            column = mapData.column;
+            row = mapData.TilesRow;
+            column = mapData.TilesColumn;
 
             currentNode = null;
 
@@ -26,19 +28,19 @@ namespace AStar
                 }
             }
 
-            openList = new List<Node_AStar>();
-            closedList = new List<Node_AStar>();
-
             FinalTrack = new List<Node_AStar>();
         }
 
         public List<Node_AStar> FinalTrack { get; private set; }
 
-        public bool FindPath(TileMap_MapData.TileMap_TileData[,] tileData, TileMap_MapData.TileMap_TileData startingTile, TileMap_MapData.TileMap_TileData destinationTile)
+        public bool FindPath(Scratch_TileData[,] tileData, Scratch_TileData startingTile, Scratch_TileData destinationTile)
         {
+            List<Node_AStar> openList = new List<Node_AStar>();
+            List<Node_AStar> closedList = new List<Node_AStar>();
+
             Refresh(tileData, destinationTile);
 
-            currentNode = node[startingTile.Index.x, startingTile.Index.z];
+            currentNode = node[startingTile.X, startingTile.Z];
 
             closedList.Add(currentNode);
 
@@ -46,17 +48,17 @@ namespace AStar
 
             while (true)
             {
-                for (int z = currentNode.Index.z - 1; z < currentNode.Index.z + 2; z++)
+                for (int z = currentNode.Z - 1; z < currentNode.Z + 2; z++)
                 {
-                    for (int x = currentNode.Index.x - 1; x < currentNode.Index.x + 2; x++)
+                    for (int x = currentNode.X - 1; x < currentNode.X + 2; x++)
                     {
                         if (NodeIndexAvailable(x, z) == false) continue;
 
                         if (node[x, z].Passable == false) continue;
 
-                        if (NodeInClosedList(node[x, z]) == true) continue;
+                        if (NodeInClosedList(closedList, node[x, z]) == true) continue;
 
-                        if (NodeInOpenList(node[x, z]) == false)
+                        if (NodeInOpenList(openList, node[x, z]) == false)
                         {
                             node[x, z].Parent = currentNode;
                             node[x, z].CalculateCostToDestination();
@@ -87,7 +89,7 @@ namespace AStar
                     }
                 }
 
-                if (currentNode == node[destinationTile.Index.x, destinationTile.Index.z])
+                if (currentNode == node[destinationTile.X, destinationTile.Z])
                 {
                     int whileBreaker = row * column;
 
@@ -95,7 +97,7 @@ namespace AStar
                     {
                         FinalTrack.Add(currentNode);
 
-                        if (currentNode == node[startingTile.Index.x, startingTile.Index.z]) return true;
+                        if (currentNode == node[startingTile.X, startingTile.Z]) return true;
 
                         currentNode = currentNode.Parent;
 
@@ -112,7 +114,7 @@ namespace AStar
             }
         }
 
-        private bool NodeInOpenList(Node_AStar checkedNode)
+        private bool NodeInOpenList(List<Node_AStar> openList, Node_AStar checkedNode)
         {
             for (int i = 0; i < openList.Count; i++)
             {
@@ -122,10 +124,8 @@ namespace AStar
             return false;
         }
 
-        private void Refresh(TileMap_MapData.TileMap_TileData[,] tileData, TileMap_MapData.TileMap_TileData destinationTile)
+        private void Refresh(Scratch_TileData[,] tileData, Scratch_TileData destinationTile)
         {
-            openList.Clear();
-            closedList.Clear();
             FinalTrack.Clear();
             currentNode = null;
 
@@ -138,7 +138,7 @@ namespace AStar
             }
         }
 
-        private bool NodeInClosedList(Node_AStar checkedNode)
+        private bool NodeInClosedList(List<Node_AStar> closedList, Node_AStar checkedNode)
         {
             for (int i = 0; i < closedList.Count; i++)
             {
@@ -158,32 +158,41 @@ namespace AStar
 
     public class Node_AStar
     {
-        public Node_AStar(TileMap_MapData.TileMap_TileData correspondingTile)
+        public Node_AStar(Scratch_TileData correspondingTile)
         {
-            Index = correspondingTile.Index;
+            X = correspondingTile.X;
+            Z = correspondingTile.Z;
         }
 
         public Node_AStar(Node_AStar copiedNode)
         {
-            this.Index = copiedNode.Index;
-            this.Parent = copiedNode.Parent;
-            this.Passable = copiedNode.Passable;
-            this.DistanceFromStart = copiedNode.DistanceFromStart;
+            this.X = copiedNode.X;
+            this.Z = copiedNode.Z;
             this.DistanceToDestination = copiedNode.DistanceToDestination;
+            this.Passable = copiedNode.Passable;
+            this.Parent = copiedNode.Parent;
+            this.DistanceFromStart = copiedNode.DistanceFromStart;
             this.CostToDestination = copiedNode.CostToDestination;
         }
 
-        public TileMap_MapData.TileIndex Index { get; private set; }
-        public Node_AStar Parent { get; set; }
-        public bool Passable { get; private set; }
-        public int DistanceFromStart { get; private set; }
+        // Constructor
+        public int X { get; private set; }
+        public int Z { get; private set; }
+
+        // Initialize
         public int DistanceToDestination { get; private set; }
+        public bool Passable { get; private set; }
+
+        public Node_AStar Parent { get; set; }
+        public int DistanceFromStart { get; private set; }
         public int CostToDestination { get; private set; }
 
-        public void Initialize(TileMap_MapData.TileMap_TileData correspondingTile, TileMap_MapData.TileMap_TileData destinationTile)
+        public void Initialize(Scratch_TileData correspondingTile, Scratch_TileData destinationTile)
         {
             Parent = null;
-            Passable = correspondingTile.Passable;
+            Passable = (correspondingTile.Type == TileType.Floor) ? true : false;
+
+            if (correspondingTile.Type == TileType.Door) Passable = correspondingTile.DoorOpened;
 
             CalculateDistanceToDestination(destinationTile);
         }
@@ -197,7 +206,7 @@ namespace AStar
 
         private void CalculateDistanceFromStart()
         {
-            if ((this.Parent.Index.x - this.Index.x != 0) && (this.Parent.Index.z - this.Index.z != 0))
+            if ((this.Parent.X - this.X != 0) && (this.Parent.Z - this.Z != 0))
             {
                 this.DistanceFromStart = this.Parent.DistanceFromStart + 14;
             }
@@ -207,13 +216,13 @@ namespace AStar
             }
         }
 
-        private void CalculateDistanceToDestination(TileMap_MapData.TileMap_TileData destinationTile)
+        private void CalculateDistanceToDestination(Scratch_TileData destinationTile)
         {
-            int destinationX = destinationTile.Index.x;
-            int destinationZ = destinationTile.Index.z;
+            int destinationX = destinationTile.X;
+            int destinationZ = destinationTile.Z;
 
-            int xDistance = Mathf.Abs(destinationX - Index.x);
-            int zDistance = Mathf.Abs(destinationZ - Index.z);
+            int xDistance = Mathf.Abs(destinationX - X);
+            int zDistance = Mathf.Abs(destinationZ - Z);
 
             if (xDistance - zDistance == 0)
             {
