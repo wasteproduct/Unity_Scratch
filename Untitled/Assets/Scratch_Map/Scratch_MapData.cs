@@ -70,6 +70,8 @@ namespace MapData
         public List<Scratch_TileData> Doors { get; private set; }
         public Scratch_TileData StartingTile { get; private set; }
 
+        public Scratch_TileData GetTile(int x,int z) { return TileData[x, z]; }
+
         private void SetWalls()
         {
             for (int z = 0; z < TilesColumn; z++)

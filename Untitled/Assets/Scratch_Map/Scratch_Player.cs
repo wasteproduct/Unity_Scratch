@@ -1,23 +1,88 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
+using AStar;
+using MapData;
+using TileData;
 
-public class Scratch_Player : MonoBehaviour
+namespace Player
 {
-    public GameObject tileMap;
-
-    // Use this for initialization
-    void Start()
+    public class Scratch_Player : MonoBehaviour
     {
-        float startingX = (float)tileMap.GetComponent<Scratch_Map>().MapData.StartingTile.X;
-        float startingZ = (float)tileMap.GetComponent<Scratch_Map>().MapData.StartingTile.Z;
+        public GameObject tileMap;
+        public GameObject highlighter;
 
-        this.transform.position = new Vector3(startingX, 0.0f, startingZ);
-    }
+        private Scratch_MapData mapData;
+        private Scratch_AStar aStar;
 
-    // Update is called once per frame
-    void Update()
-    {
+        private readonly int invalidIndex = -1;
+        private int mouseOnTileX = 0;
+        private int mouseOnTileZ = 0;
+        private int currentTileX;
+        private int currentTileZ;
 
+        // Use this for initialization
+        void Start()
+        {
+            mapData = tileMap.GetComponent<Scratch_Map>().MapData;
+
+            currentTileX = tileMap.GetComponent<Scratch_Map>().MapData.StartingTile.X;
+            currentTileZ = tileMap.GetComponent<Scratch_Map>().MapData.StartingTile.Z;
+
+            this.transform.position = new Vector3((float)currentTileX, 0.0f, (float)currentTileZ);
+
+            aStar = new Scratch_AStar(mapData);
+        }
+
+        // Update is called once per frame
+        void Update()
+        {
+            highlighter.transform.position = SetHighlighterPosition();
+
+            currentTileX = (int)(this.transform.position.x + .5f);
+            currentTileZ = (int)(this.transform.position.z + .5f);
+
+            // 클릭했을 때
+            if (Input.GetKey(KeyCode.Mouse1))
+            {
+                if ((mouseOnTileX == invalidIndex) || (mouseOnTileZ == invalidIndex)) return;
+
+                bool pathFound = false;
+                pathFound = aStar.FindPath(mapData.TileData, mapData.GetTile(currentTileX, currentTileZ), mapData.GetTile(mouseOnTileX, mouseOnTileZ));
+
+                if (pathFound == false)
+                {
+                    Debug.Log("Failed to find path.");
+                    return;
+                }
+                
+                for (int i = 0; i < aStar.FinalTrack.Count - 1; i++)
+                {
+                    Scratch_TileData start = mapData.GetTile(aStar.FinalTrack[i].X, aStar.FinalTrack[i].Z);
+                    Scratch_TileData end = mapData.GetTile(aStar.FinalTrack[i + 1].X, aStar.FinalTrack[i + 1].Z);
+
+                    Debug.DrawLine(new Vector3((float)start.X, 1.0f, (float)start.Z), new Vector3((float)end.X, 1.0f, (float)end.Z), Color.red);
+                }
+            }
+        }
+
+        private Vector3 SetHighlighterPosition()
+        {
+            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+            RaycastHit hitInfo;
+
+            if (Physics.Raycast(ray, out hitInfo, 100.0f, 1 << LayerMask.NameToLayer("Tile Map")) == true)
+            {
+                mouseOnTileX = (int)(hitInfo.point.x + .5f);
+                mouseOnTileZ = (int)(hitInfo.point.z + .5f);
+
+                Scratch_TileData currentTile = mapData.TileData[mouseOnTileX, mouseOnTileZ];
+
+                return new Vector3((float)currentTile.X, .0f, (float)currentTile.Z);
+            }
+
+            mouseOnTileX = invalidIndex;
+            mouseOnTileZ = invalidIndex;
+
+            return Vector3.zero;
+        }
     }
 }
