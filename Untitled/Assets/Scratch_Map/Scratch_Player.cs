@@ -24,7 +24,7 @@ namespace Player
         {
             mapData = tileMap.GetComponent<Scratch_Map>().MapData;
 
-            currentTileX = tileMap.GetComponent<Scratch_Map>().MapData.StartingTile.X;
+            currentTileX = tileMap.GetComponent<Scratch_Map>().MapData.StartingTile.X + 4;
             currentTileZ = tileMap.GetComponent<Scratch_Map>().MapData.StartingTile.Z;
 
             this.transform.position = new Vector3((float)currentTileX, 0.0f, (float)currentTileZ);
@@ -39,6 +39,22 @@ namespace Player
 
             currentTileX = (int)(this.transform.position.x + .5f);
             currentTileZ = (int)(this.transform.position.z + .5f);
+
+            if (Input.GetKeyDown(KeyCode.Mouse0))
+            {
+                Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+                RaycastHit hitInfo;
+
+                //if (Physics.Raycast(ray, out hitInfo, 100.0f, 1 << LayerMask.NameToLayer("Tile Map")) == true)
+                //{
+                //    mouseOnTileX = (int)(hitInfo.point.x + .5f);
+                //    mouseOnTileZ = (int)(hitInfo.point.z + .5f);
+
+                //    Scratch_TileData currentTile = mapData.TileData[mouseOnTileX, mouseOnTileZ];
+
+                //    return new Vector3((float)currentTile.X, .0f, (float)currentTile.Z);
+                //}
+            }
 
             // 클릭했을 때
             if (Input.GetKey(KeyCode.Mouse1))
