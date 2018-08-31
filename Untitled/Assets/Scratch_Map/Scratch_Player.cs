@@ -63,14 +63,6 @@ namespace Player
 
                 moving = true;
                 StartCoroutine(Move());
-
-                //for (int i = 0; i < aStar.FinalTrack.Count - 1; i++)
-                //{
-                //    Scratch_TileData start = mapData.GetTile(aStar.FinalTrack[i].X, aStar.FinalTrack[i].Z);
-                //    Scratch_TileData end = mapData.GetTile(aStar.FinalTrack[i + 1].X, aStar.FinalTrack[i + 1].Z);
-
-                //    Debug.DrawLine(new Vector3((float)start.X, 1.0f, (float)start.Z), new Vector3((float)end.X, 1.0f, (float)end.Z), Color.red);
-                //}
             }
 
             //if (Input.GetKeyDown(KeyCode.Mouse0))
