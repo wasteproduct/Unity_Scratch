@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections;
+using UnityEngine;
 using AStar;
 using MapData;
 using TileData;
@@ -18,6 +19,10 @@ namespace Player
         private int mouseOnTileZ = 0;
         private int currentTileX;
         private int currentTileZ;
+
+        private bool moving;
+        private float fromTileToTile;
+        private readonly float durationFromTileToTile = 0.2f;
 
         // Use this for initialization
         void Start()
@@ -40,20 +45,10 @@ namespace Player
             currentTileX = (int)(this.transform.position.x + .5f);
             currentTileZ = (int)(this.transform.position.z + .5f);
 
+            if (moving == true) return;
+
+            // 좌클릭
             if (Input.GetKeyDown(KeyCode.Mouse0))
-            {
-                Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-                RaycastHit hitInfo;
-
-                if (Physics.Raycast(ray, out hitInfo, 100.0f, 1 << LayerMask.NameToLayer("Door")) == true)
-                {
-                    Scratch_Door clickedDoor = hitInfo.collider.gameObject.GetComponentInParent<Scratch_Door>();
-                    clickedDoor.Open();
-                    if (mapData.GetTile(clickedDoor.X, clickedDoor.Z).DoorOpened == false) mapData.GetTile(clickedDoor.X, clickedDoor.Z).DoorOpened = true;
-                }
-            }
-
-            if (Input.GetKey(KeyCode.Mouse1))
             {
                 if ((mouseOnTileX == invalidIndex) || (mouseOnTileZ == invalidIndex)) return;
 
@@ -65,14 +60,61 @@ namespace Player
                     Debug.Log("Failed to find path.");
                     return;
                 }
-                
-                for (int i = 0; i < aStar.FinalTrack.Count - 1; i++)
-                {
-                    Scratch_TileData start = mapData.GetTile(aStar.FinalTrack[i].X, aStar.FinalTrack[i].Z);
-                    Scratch_TileData end = mapData.GetTile(aStar.FinalTrack[i + 1].X, aStar.FinalTrack[i + 1].Z);
 
-                    Debug.DrawLine(new Vector3((float)start.X, 1.0f, (float)start.Z), new Vector3((float)end.X, 1.0f, (float)end.Z), Color.red);
+                moving = true;
+                StartCoroutine(Move());
+
+                //for (int i = 0; i < aStar.FinalTrack.Count - 1; i++)
+                //{
+                //    Scratch_TileData start = mapData.GetTile(aStar.FinalTrack[i].X, aStar.FinalTrack[i].Z);
+                //    Scratch_TileData end = mapData.GetTile(aStar.FinalTrack[i + 1].X, aStar.FinalTrack[i + 1].Z);
+
+                //    Debug.DrawLine(new Vector3((float)start.X, 1.0f, (float)start.Z), new Vector3((float)end.X, 1.0f, (float)end.Z), Color.red);
+                //}
+            }
+
+            //if (Input.GetKeyDown(KeyCode.Mouse0))
+            //{
+            //    Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+            //    RaycastHit hitInfo;
+
+            //    if (Physics.Raycast(ray, out hitInfo, 100.0f, 1 << LayerMask.NameToLayer("Door")) == true)
+            //    {
+            //        Scratch_Door clickedDoor = hitInfo.collider.gameObject.GetComponentInParent<Scratch_Door>();
+            //        clickedDoor.Open();
+            //        if (mapData.GetTile(clickedDoor.X, clickedDoor.Z).DoorOpened == false) mapData.GetTile(clickedDoor.X, clickedDoor.Z).DoorOpened = true;
+            //    }
+            //}
+        }
+
+        private IEnumerator Move()
+        {
+            int trackIndex = 0;
+            Vector3 startingPosition = new Vector3((float)aStar.FinalTrack[trackIndex].X, 0.0f, (float)aStar.FinalTrack[trackIndex].Z);
+            Vector3 destination = new Vector3((float)aStar.FinalTrack[trackIndex + 1].X, 0.0f, (float)aStar.FinalTrack[trackIndex + 1].Z);
+
+            while (true)
+            {
+                if (fromTileToTile >= durationFromTileToTile)
+                {
+                    fromTileToTile = 0.0f;
+
+                    if (trackIndex >= aStar.FinalTrack.Count - 2)
+                    {
+                        moving = false;
+                        break;
+                    }
+
+                    trackIndex++;
+
+                    startingPosition = new Vector3((float)aStar.FinalTrack[trackIndex].X, 0.0f, (float)aStar.FinalTrack[trackIndex].Z);
+                    destination = new Vector3((float)aStar.FinalTrack[trackIndex + 1].X, 0.0f, (float)aStar.FinalTrack[trackIndex + 1].Z);
                 }
+
+                fromTileToTile += Time.deltaTime;
+                this.transform.position = Vector3.Lerp(startingPosition, destination, fromTileToTile / durationFromTileToTile);
+
+                yield return null;
             }
         }
 

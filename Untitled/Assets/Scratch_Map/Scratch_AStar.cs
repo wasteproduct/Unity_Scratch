@@ -99,7 +99,11 @@ namespace AStar
                     {
                         FinalTrack.Add(currentNode);
 
-                        if (currentNode == node[startingTile.X, startingTile.Z]) return true;
+                        if (currentNode == node[startingTile.X, startingTile.Z])
+                        {
+                            FinalTrack.Reverse();
+                            return true;
+                        }
 
                         currentNode = currentNode.Parent;
 
