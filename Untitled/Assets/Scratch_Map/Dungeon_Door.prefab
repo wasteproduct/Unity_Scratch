@@ -22,6 +22,7 @@ GameObject:
   - component: {fileID: 33006016875793686}
   - component: {fileID: 23790971825111022}
   - component: {fileID: 65052982602724308}
+  - component: {fileID: 114974842984472508}
   m_Layer: 9
   m_Name: door
   m_TagString: Untagged
@@ -39,10 +40,10 @@ GameObject:
   - component: {fileID: 4247178664516670}
   - component: {fileID: 33086487825310572}
   - component: {fileID: 23969992808694964}
-  - component: {fileID: 114970623058425634}
   - component: {fileID: 65042522020958172}
   - component: {fileID: 64501870739406636}
   - component: {fileID: 95331545473204048}
+  - component: {fileID: 114671706582781562}
   m_Layer: 0
   m_Name: door_wall_A3
   m_TagString: Untagged
@@ -73,7 +74,7 @@ Transform:
   m_GameObject: {fileID: 1789108224885206}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1.5, y: 1.5, z: 1.5}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 4613177336593930}
   m_Father: {fileID: 4482928311301440}
@@ -87,7 +88,7 @@ Transform:
   m_GameObject: {fileID: 1942150228951816}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 1.5, y: 1.5, z: 1.5}
   m_Children:
   - {fileID: 4247178664516670}
   m_Father: {fileID: 0}
@@ -246,7 +247,7 @@ Animator:
   m_HasTransformHierarchy: 1
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorControllerStateOnDisable: 0
---- !u!114 &114970623058425634
+--- !u!114 &114671706582781562
 MonoBehaviour:
   m_ObjectHideFlags: 1
   m_PrefabParentObject: {fileID: 0}
@@ -254,6 +255,17 @@ MonoBehaviour:
   m_GameObject: {fileID: 1789108224885206}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 12ecde3c6a9545943bebd5e84de20d17, type: 3}
+  m_Script: {fileID: 11500000, guid: 549bdef1763cd694a9cfbeafbfa4aca6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &114974842984472508
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1323891793136286}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9e745028ff8ce9b45b42d995873a48d8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 

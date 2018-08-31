@@ -34,7 +34,7 @@ namespace TileData
         public int X { get; private set; }
         public int Z { get; private set; }
         public TileType Type { get; private set; }
-        public bool DoorOpened { get; private set; }
+        public bool DoorOpened { get; set; }
         // Direction of wall / door
         public List<WallDirection> Direction { get; private set; }
 

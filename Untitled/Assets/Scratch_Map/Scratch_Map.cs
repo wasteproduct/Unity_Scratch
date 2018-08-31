@@ -61,7 +61,7 @@ public class Scratch_Map : MonoBehaviour
         for (int i = 0; i < MapData.Doors.Count; i++)
         {
             Quaternion wallDirection = Quaternion.identity;
-
+            
             switch (MapData.Doors[i].Direction[0])
             {
                 case TileData.WallDirection.Left:
@@ -75,7 +75,8 @@ public class Scratch_Map : MonoBehaviour
                     break;
             }
 
-            Instantiate<GameObject>(dungeonDoor, new Vector3((float)MapData.Doors[i].X, 0.0f, (float)MapData.Doors[i].Z), wallDirection, this.transform);
+            GameObject newDoor = Instantiate<GameObject>(dungeonDoor, new Vector3((float)MapData.Doors[i].X, 0.0f, (float)MapData.Doors[i].Z), wallDirection, this.transform);
+            newDoor.GetComponentInChildren<Scratch_Door>().SetTileIndex(MapData.Doors[i].X, MapData.Doors[i].Z);
         }
     }
 

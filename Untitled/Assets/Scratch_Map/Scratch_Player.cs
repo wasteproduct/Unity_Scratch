@@ -45,18 +45,14 @@ namespace Player
                 Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
                 RaycastHit hitInfo;
 
-                //if (Physics.Raycast(ray, out hitInfo, 100.0f, 1 << LayerMask.NameToLayer("Tile Map")) == true)
-                //{
-                //    mouseOnTileX = (int)(hitInfo.point.x + .5f);
-                //    mouseOnTileZ = (int)(hitInfo.point.z + .5f);
-
-                //    Scratch_TileData currentTile = mapData.TileData[mouseOnTileX, mouseOnTileZ];
-
-                //    return new Vector3((float)currentTile.X, .0f, (float)currentTile.Z);
-                //}
+                if (Physics.Raycast(ray, out hitInfo, 100.0f, 1 << LayerMask.NameToLayer("Door")) == true)
+                {
+                    Scratch_Door clickedDoor = hitInfo.collider.gameObject.GetComponentInParent<Scratch_Door>();
+                    clickedDoor.Open();
+                    if (mapData.GetTile(clickedDoor.X, clickedDoor.Z).DoorOpened == false) mapData.GetTile(clickedDoor.X, clickedDoor.Z).DoorOpened = true;
+                }
             }
 
-            // 클릭했을 때
             if (Input.GetKey(KeyCode.Mouse1))
             {
                 if ((mouseOnTileX == invalidIndex) || (mouseOnTileZ == invalidIndex)) return;
