@@ -35,8 +35,14 @@ namespace TileData
         public int Z { get; private set; }
         public TileType Type { get; private set; }
         public bool DoorOpened { get; set; }
+        public Scratch_Door Door { get; set; }
         // Direction of wall / door
         public List<WallDirection> Direction { get; private set; }
+
+        public void HighlightDoor()
+        {
+            // 이 타일이 가진 문을 highlight
+        }
 
         public void UpdateTile(TileType newType)
         {

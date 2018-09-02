@@ -76,7 +76,10 @@ public class Scratch_Map : MonoBehaviour
             }
 
             GameObject newDoor = Instantiate<GameObject>(dungeonDoor, new Vector3((float)MapData.Doors[i].X, 0.0f, (float)MapData.Doors[i].Z), wallDirection, this.transform);
-            newDoor.GetComponentInChildren<Scratch_Door>().SetTileIndex(MapData.Doors[i].X, MapData.Doors[i].Z);
+
+            Scratch_Door newDoorHandler = newDoor.GetComponentInChildren<Scratch_Door>();
+            newDoorHandler.SetTileIndex(MapData.Doors[i].X, MapData.Doors[i].Z);
+            MapData.Doors[i].Door = newDoorHandler;
         }
     }
 

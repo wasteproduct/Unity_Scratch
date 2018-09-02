@@ -120,6 +120,8 @@ namespace Player
                 mouseOnTileX = (int)(hitInfo.point.x + .5f);
                 mouseOnTileZ = (int)(hitInfo.point.z + .5f);
 
+                HighlightDoor();
+
                 Scratch_TileData currentTile = mapData.TileData[mouseOnTileX, mouseOnTileZ];
 
                 return new Vector3((float)currentTile.X, .0f, (float)currentTile.Z);
@@ -129,6 +131,17 @@ namespace Player
             mouseOnTileZ = invalidIndex;
 
             return Vector3.zero;
+        }
+
+        private void HighlightDoor()
+        {
+            if (mapData.GetTile(mouseOnTileX, mouseOnTileZ).Type != TileType.Door) return;
+
+            if (mapData.GetTile(mouseOnTileX, mouseOnTileZ).DoorOpened == true) return;
+
+            mapData.GetTile(mouseOnTileX, mouseOnTileZ).Door.HighlightDoor();
+
+            // 매터리얼 되돌리기 해야 해
         }
     }
 }
