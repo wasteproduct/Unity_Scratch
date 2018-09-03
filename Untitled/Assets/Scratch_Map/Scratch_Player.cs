@@ -40,6 +40,8 @@ namespace Player
         // Update is called once per frame
         void Update()
         {
+            ResetMaterials();
+
             highlighter.transform.position = SetHighlighterPosition();
 
             currentTileX = (int)(this.transform.position.x + .5f);
@@ -53,33 +55,41 @@ namespace Player
                 if ((mouseOnTileX == invalidIndex) || (mouseOnTileZ == invalidIndex)) return;
 
                 bool pathFound = false;
-                pathFound = aStar.FindPath(mapData.TileData, mapData.GetTile(currentTileX, currentTileZ), mapData.GetTile(mouseOnTileX, mouseOnTileZ));
+                bool doorTile = false;
 
+                if (mapData.GetTile(mouseOnTileX, mouseOnTileZ).Type == TileType.Door) doorTile = true;
+
+                pathFound = aStar.FindPath(mapData.TileData, mapData.GetTile(currentTileX, currentTileZ), mapData.GetTile(mouseOnTileX, mouseOnTileZ), doorTile);
+                
                 if (pathFound == false)
                 {
                     Debug.Log("Failed to find path.");
                     return;
                 }
 
+                if ((aStar.FinalTrack.Count < 2) && (doorTile == true))
+                {
+                    mapData.GetTile(mouseOnTileX, mouseOnTileZ).OpenDoor();
+                    return;
+                }
+
                 moving = true;
-                StartCoroutine(Move());
+                StartCoroutine(Move(doorTile, mouseOnTileX, mouseOnTileZ));
             }
-
-            //if (Input.GetKeyDown(KeyCode.Mouse0))
-            //{
-            //    Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-            //    RaycastHit hitInfo;
-
-            //    if (Physics.Raycast(ray, out hitInfo, 100.0f, 1 << LayerMask.NameToLayer("Door")) == true)
-            //    {
-            //        Scratch_Door clickedDoor = hitInfo.collider.gameObject.GetComponentInParent<Scratch_Door>();
-            //        clickedDoor.Open();
-            //        if (mapData.GetTile(clickedDoor.X, clickedDoor.Z).DoorOpened == false) mapData.GetTile(clickedDoor.X, clickedDoor.Z).DoorOpened = true;
-            //    }
-            //}
         }
 
-        private IEnumerator Move()
+        private void ResetMaterials()
+        {
+            for (int i = 0; i < mapData.Doors.Count; i++)
+            {
+                if (mapData.Doors[i].Door.Highlighted == true)
+                {
+                    mapData.Doors[i].Door.ResetDoorColor();
+                }
+            }
+        }
+
+        private IEnumerator Move(bool doorTile = false, int doorX = -1, int doorZ = -1)
         {
             int trackIndex = 0;
             Vector3 startingPosition = new Vector3((float)aStar.FinalTrack[trackIndex].X, 0.0f, (float)aStar.FinalTrack[trackIndex].Z);
@@ -93,6 +103,8 @@ namespace Player
 
                     if (trackIndex >= aStar.FinalTrack.Count - 2)
                     {
+                        if (doorTile == true) mapData.GetTile(doorX, doorZ).OpenDoor();
+
                         moving = false;
                         break;
                     }
@@ -137,11 +149,7 @@ namespace Player
         {
             if (mapData.GetTile(mouseOnTileX, mouseOnTileZ).Type != TileType.Door) return;
 
-            if (mapData.GetTile(mouseOnTileX, mouseOnTileZ).DoorOpened == true) return;
-
             mapData.GetTile(mouseOnTileX, mouseOnTileZ).Door.HighlightDoor();
-
-            // 매터리얼 되돌리기 해야 해
         }
     }
 }

@@ -38,7 +38,7 @@ namespace AStar
 
         public List<Node_AStar> FinalTrack { get; private set; }
 
-        public bool FindPath(Scratch_TileData[,] tileData, Scratch_TileData startingTile, Scratch_TileData destinationTile)
+        public bool FindPath(Scratch_TileData[,] tileData, Scratch_TileData startingTile, Scratch_TileData destinationTile, bool doorTile = false)
         {
             Refresh(tileData, destinationTile);
 
@@ -47,6 +47,8 @@ namespace AStar
             closedList.Add(currentNode);
 
             int failureCount = row * column;
+
+            if (doorTile == true) node[destinationTile.X, destinationTile.Z].Passable = true;
 
             while (true)
             {
@@ -94,6 +96,11 @@ namespace AStar
                 if (currentNode == node[destinationTile.X, destinationTile.Z])
                 {
                     int whileBreaker = row * column;
+
+                    if (doorTile == true)
+                    {
+                        currentNode = currentNode.Parent;
+                    }
 
                     while (true)
                     {
@@ -188,7 +195,7 @@ namespace AStar
         public int Z { get; private set; }
 
         // Initialize
-        public bool Passable { get; private set; }
+        public bool Passable { get; set; }
         public int DistanceToDestination { get; private set; }
 
         public Node_AStar Parent { get; set; }
@@ -200,7 +207,7 @@ namespace AStar
             Parent = null;
             Passable = (correspondingTile.Type == TileType.Floor) ? true : false;
 
-            if (correspondingTile.Type == TileType.Door) Passable = correspondingTile.DoorOpened;
+            //if (correspondingTile.Type == TileType.Door) Passable = correspondingTile.DoorOpened;
 
             CalculateDistanceToDestination(destinationTile);
         }

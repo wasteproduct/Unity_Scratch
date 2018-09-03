@@ -27,17 +27,24 @@ namespace TileData
             X = x;
             Z = z;
             Type = TileType.None;
-            DoorOpened = false;
+            //DoorOpened = false;
             Direction = new List<WallDirection>();
         }
 
         public int X { get; private set; }
         public int Z { get; private set; }
         public TileType Type { get; private set; }
-        public bool DoorOpened { get; set; }
+        //public bool DoorOpened { get; private set; }
         public Scratch_Door Door { get; set; }
         // Direction of wall / door
         public List<WallDirection> Direction { get; private set; }
+
+        public void OpenDoor()
+        {
+            //DoorOpened = true;
+            Type = TileType.Floor;
+            Door.Open();
+        }
 
         public void HighlightDoor()
         {
